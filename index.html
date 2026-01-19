@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การสอบการนวดไทย - รพ.สะเดา</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --primary-dark: #1a2639;
+            --accent-red: #8a1c1c;
+            --text-light: #f4f4f4;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--primary-dark);
+            background-image: url("https://www.transparenttextures.com/patterns/black-scales.png");
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 3px solid var(--primary-gold);
+            margin-bottom: 30px;
+            background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.2), transparent);
+        }
+
+        h1 {
+            font-family: 'Prompt', sans-serif;
+            font-size: 2.5rem;
+            color: var(--primary-gold);
+            text-shadow: 2px 2px 4px #000;
+            margin: 0;
+        }
+
+        h2 { font-size: 1.2rem; color: #ccc; margin-top: 10px; }
+
+        .location-badge {
+            background-color: var(--accent-red);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 10px;
+            box-shadow: 0 0 10px rgba(138, 28, 28, 0.5);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .column {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 600px;
+            transition: all 0.3s ease;
+        }
+
+        .column-header {
+            font-family: 'Prompt', sans-serif;
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-gold);
+            color: var(--primary-gold);
+        }
+
+        .card {
+            background: white;
+            color: #333;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 5px solid var(--primary-gold);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            animation: fadeIn 0.5s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-name { font-weight: 600; font-size: 1.1rem; }
+
+        .exam-card {
+            background: linear-gradient(135deg, #fff, #f0f0f0);
+            border-left: 5px solid var(--accent-red);
+            padding: 20px;
+        }
+
+        .topic-badge {
+            background-color: var(--primary-dark);
+            color: var(--primary-gold);
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        .status-badge { font-size: 0.8rem; padding: 3px 8px; border-radius: 4px; color: white; }
+        .bg-queue { background-color: #2ecc71; }
+        .bg-regis { background-color: #3498db; cursor: pointer; text-decoration: none; display:block; text-align:center; color:white; padding:10px; border-radius:5px; margin-top:5px;}
+
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #loading { text-align: center; color: var(--primary-gold); margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1><i class="fas fa-spa"></i> การสอบการนวดไทย ยืดเหยียดเฉพาะทาง 7 ด้าน</h1>
+    <h2>โรงพยาบาลสะเดา อ.สะเดา จ.สงขลา</h2>
+    <div class="location-badge">Real-time Dashboard</div>
+</header>
+
+<div id="loading"><i class="fas fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</div>
+
+<div class="container" id="main-content" style="display:none;">
+    <div class="column">
+        <div class="column-header"><i class="fas fa-user-clock"></i> รอเรียก / คิวสอบ</div>
+        <div id="queue-list"></div>
+        <hr style="border-color:rgba(255,255,255,0.1); margin: 20px 0;">
+        <h3 style="color:#aaa; text-align:center;">เก็บตัวรอเรียก</h3>
+        <div id="waiting-list"></div>
+    </div>
+
+    <div class="column">
+        <div class="column-header"><i class="fas fa-procedures"></i> กำลังสอบ (Examining)</div>
+        <div id="examining-list" class="examining-zone"></div>
+    </div>
+
+    <div class="column">
+        <div class="column-header"><i class="fas fa-clipboard-check"></i> ลงทะเบียนหลังสอบ</div>
+        <div id="finished-list"></div>
+    </div>
+</div>
+
+<script>
+    // ************************************************
+    // ลิงก์ของคุณ (เชื่อมต่อแล้ว)
+    const API_URL = "https://script.google.com/macros/s/AKfycby3XkXyTBYeA_jTeVb0KK6Ae3y2fqVxRkJEgRD_kkLG6T6xLKG6Dss5ZWbQGWbL5o7I/exec";
+    
+    // *** อย่าลืมเปลี่ยนลิงก์นี้เป็นลิงก์ Google Form ของคุณ ***
+    const GOOGLE_FORM_URL = "https://docs.google.com/forms/"; 
+    // ************************************************
+
+    const diseaseMap = {
+        "1": "โรคอัมพฤกษ์ อัมพาต",
+        "2": "หมอนรองกระดูกทับเส้นประสาท",
+        "3": "กล้ามเนื้อสะโพกหนีบเส้นประสาท (สลักเพชร)",
+        "4": "โรคหัวไหล่ติด",
+        "5": "กลุ่มปวดกล้ามเนื้อและเนื้อเยื่อพังผืด",
+        "6": "โรคนิ้วล็อก",
+        "7": "กลุ่มอาการปวดเข่า"
+    };
+
+    async function fetchData() {
+        try {
+            const response = await fetch(API_URL);
+            const data = await response.json();
+            renderData(data);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('main-content').style.display = 'grid';
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // กรณี error ไม่แสดง alert รบกวน แต่ log ไว้
+        }
+    }
+
+    function renderData(data) {
+        const waitingEl = document.getElementById('waiting-list');
+        const queueEl = document.getElementById('queue-list');
+        const examEl = document.getElementById('examining-list');
+        const finishEl = document.getElementById('finished-list');
+
+        waitingEl.innerHTML = '';
+        queueEl.innerHTML = '';
+        examEl.innerHTML = '';
+        finishEl.innerHTML = '';
+
+        data.forEach(student => {
+            // ป้องกัน error กรณีไม่มีข้อมูล status
+            const status = student.status ? student.status.toLowerCase().trim() : 'waiting';
+            const topicName = diseaseMap[student.topic] || "ไม่ระบุ";
+
+            const createCard = (extraClass = "") => `
+                <div class="card ${extraClass}">
+                    <div>
+                        <div class="card-name">${student.name}</div>
+                        ${student.topic && student.topic !== "-" ? `<div class="topic-badge"><i class="fas fa-notes-medical"></i> ${topicName}</div>` : ''}
+                    </div>
+                    ${status === 'queue' ? '<div class="status-badge bg-queue">คิวสอบ</div>' : ''}
+                </div>
+            `;
+
+            if (status === 'examining') {
+                examEl.innerHTML += `
+                    <div class="card exam-card">
+                        <div style="width:100%">
+                            <div style="display:flex; justify-content:space-between;">
+                                <div class="card-name" style="font-size:1.3rem;">${student.name}</div>
+                                <i class="fas fa-heartbeat" style="color:var(--accent-red); font-size:1.5rem;"></i>
+                            </div>
+                            <div style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.05); border-radius:5px;">
+                                <strong>สถานีสอบ:</strong> ${topicName}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (status === 'queue') {
+                queueEl.innerHTML += createCard();
+            } else if (status === 'waiting') {
+                waitingEl.innerHTML += createCard();
+            } else if (status === 'registration' || status === 'done') {
+                finishEl.innerHTML += `
+                    <div class="card" style="display:block;">
+                        <div class="card-name">${student.name}</div>
+                        <a href="${GOOGLE_FORM_URL}" target="_blank" class="bg-regis">
+                            <i class="fas fa-pen"></i> ลงทะเบียน
+                        </a>
+                    </div>
+                `;
+            }
+        });
+    }
+
+    setInterval(fetchData, 3000); // อัพเดททุก 3 วินาที
+    fetchData();
+</script>
+
+</body>
+</html>
