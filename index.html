@@ -57,9 +57,11 @@
         .btn-blue { background: #3498db; color: white; font-weight: bold; }
         .btn-green { background: #2ecc71; color: white; font-weight: bold; }
         .btn-red { background: #e74c3c; color: white; font-weight: bold; }
-        .btn-close { background: #95a5a6; color: white; margin-top: 15px; }
+        .btn-grey { background: #95a5a6; color: white; }
+        .btn-close { background: #34495e; color: #ccc; margin-top: 15px; border: 1px solid #555; }
 
-        /* Timer */
+        /* Timer Controls */
+        .control-group { display: flex; gap: 10px; margin-top: 10px; }
         .timer-big { font-size: 4rem; font-family: 'Courier New', monospace; font-weight: bold; margin: 15px 0; }
         .timer-normal { color: white; }
         .timer-orange { color: var(--accent-orange); animation: blink 1s infinite; }
@@ -109,24 +111,36 @@
 
         <div id="stage-timer" style="display:none;">
             <div id="timerDisplay" class="timer-big timer-normal">15:00</div>
-            <button onclick="actionFinishExam()" class="btn-red"><i class="fas fa-check"></i> สอบเสร็จสิ้น</button>
+            
+            <div class="control-group">
+                <button id="btnToggle" onclick="toggleTimer()" class="btn-green">Start</button>
+                <button onclick="resetTimer()" class="btn-grey">Reset</button>
+            </div>
+            
+            <button onclick="actionFinishExam()" class="btn-red" style="margin-top:15px;"><i class="fas fa-check"></i> สอบเสร็จสิ้น</button>
         </div>
 
-        <button onclick="closeModal()" class="btn-close">ปิดหน้าต่าง</button>
+        <button onclick="closeModal()" class="btn-close">ปิดหน้าต่าง / ยกเลิก</button>
     </div>
 </div>
 
 <script>
     // **********************************
-    // ใส่ลิงก์ GAS ตรงนี้ (อย่าลืม Deploy New Version ก่อนนะ)
-    const API_URL = "https://script.google.com/macros/s/AKfycby3XkXyTBYeA_jTeVb0KK6Ae3y2fqVxRkJEgRD_kkLG6T6xLKG6Dss5ZWbQGWbL5o7I/exec"; 
+    // ใส่ลิงก์ GAS ของคุณตรงนี้
+    const API_URL = "YOUR_GAS_WEB_APP_URL_HERE"; 
     // **********************************
 
     const diseaseMap = { "1":"อัมพฤกษ์", "2":"หมอนรองกระดูก", "3":"สลักเพชร", "4":"ไหล่ติด", "5":"กล้ามเนื้อ/พังผืด", "6":"นิ้วล็อก", "7":"ปวดเข่า" };
     
     let allData = [];
     let currentStudent = null;
+    
+    // ตัวแปรสำหรับ Timer ใน Popup (Manual Control)
+    let modalTimerInterval = null;
+    let timeLeft = 900; // 15 นาที
+    let isTimerRunning = false;
 
+    // Main Loop (ดึงข้อมูลเรื่อยๆ)
     setInterval(fetchData, 2000); 
     setInterval(updateCardTimers, 1000); 
     fetchData();
@@ -147,7 +161,7 @@
         waiting.innerHTML = ''; queue.innerHTML = ''; exam.innerHTML = '';
 
         allData.forEach(s => {
-            const status = s.status.toLowerCase();
+            const status = s.status ? s.status.toLowerCase() : 'waiting';
             const topicName = diseaseMap[s.topic] || "";
             
             let html = `
@@ -181,9 +195,10 @@
         return 'card-wait';
     }
 
+    // อัพเดทเวลาหน้าบัตร (Dashboard) - ใช้นับเดินหน้าเหมือนเดิม
     function updateCardTimers() {
         allData.forEach(s => {
-            if(s.status.toLowerCase() === 'examining' && s.startTime) {
+            if(s.status && s.status.toLowerCase() === 'examining' && s.startTime) {
                 const el = document.getElementById(`timer-${s.id}`);
                 if(el) {
                     const diff = Math.floor((Date.now() - s.startTime) / 1000);
@@ -195,11 +210,9 @@
                 }
             }
         });
-        if(currentStudent && currentStudent.status.toLowerCase() === 'examining' && document.getElementById('modal').style.display !== 'none') {
-             updatePopupCountdown();
-        }
     }
 
+    // --- Modal Logic ---
     function openModal(id) {
         currentStudent = allData.find(x => x.id == id);
         if(!currentStudent) return;
@@ -212,49 +225,114 @@
         document.getElementById('stage-start').style.display = 'none';
         document.getElementById('stage-timer').style.display = 'none';
 
-        const status = currentStudent.status.toLowerCase();
+        // เคลียร์ Timer เก่าทุกครั้งที่เปิดใหม่
+        resetTimer(); 
+
+        let status = currentStudent.status ? currentStudent.status.toLowerCase() : 'waiting';
+        if (status === '') status = 'waiting';
+
         if(status === 'waiting') {
             document.getElementById('stage-select').style.display = 'block';
             const sel = document.getElementById('selTopic');
             sel.innerHTML = '';
+            let history = currentStudent.history || [];
+            
             for(let k in diseaseMap) {
-                if(!currentStudent.history.includes(k)) {
+                if(!history.includes(k)) {
                     let opt = document.createElement('option');
                     opt.value = k; opt.innerText = diseaseMap[k];
                     sel.appendChild(opt);
                 }
             }
+            if(sel.options.length === 0) {
+                 let opt = document.createElement('option'); opt.innerText = "สอบครบแล้ว"; sel.appendChild(opt);
+                 document.querySelector('#stage-select button').disabled = true;
+            } else {
+                 document.querySelector('#stage-select button').disabled = false;
+            }
+
         } else if (status === 'queue') {
             document.getElementById('stage-start').style.display = 'block';
+
         } else if (status === 'examining') {
             document.getElementById('stage-timer').style.display = 'block';
-            updatePopupCountdown();
+            
+            // คำนวณเวลาที่เหลือจาก Server (ถ้ามี) เพื่อให้เวลาตรงกัน
+            if(currentStudent.startTime) {
+                const EXAM_DURATION = 15 * 60; // 15 นาทีเป็นวินาที
+                const elapsed = Math.floor((Date.now() - currentStudent.startTime) / 1000);
+                const remaining = EXAM_DURATION - elapsed;
+                
+                if(remaining > 0) {
+                    timeLeft = remaining;
+                } else {
+                    timeLeft = 0;
+                }
+            }
+            
+            updateTimerDisplay();
+            // เริ่มเดินเวลาอัตโนมัติเมื่อเปิดหน้าต่าง (หรือจะให้กด Start เองก็ได้ แต่แบบนี้สะดวกกว่า)
+            startTimer(); 
         }
     }
 
-    function updatePopupCountdown() {
-        if(!currentStudent.startTime) return;
-        const EXAM_DURATION_MS = 15 * 60 * 1000;
-        const endTime = currentStudent.startTime + EXAM_DURATION_MS;
-        const remaining = Math.floor((endTime - Date.now()) / 1000);
-        const timerDisplay = document.getElementById('timerDisplay');
-        
-        if(remaining <= 0) {
-            timerDisplay.innerText = "00:00";
-            timerDisplay.className = "timer-big timer-red";
-            return;
-        }
+    // --- Manual Timer Functions ---
+    function updateTimerDisplay() {
+        const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        const s = (timeLeft % 60).toString().padStart(2, '0');
+        const display = document.getElementById('timerDisplay');
+        display.innerText = `${m}:${s}`;
 
-        const m = Math.floor(remaining / 60).toString().padStart(2,'0');
-        const s = (remaining % 60).toString().padStart(2,'0');
-        timerDisplay.innerText = `${m}:${s}`;
-        timerDisplay.className = "timer-big timer-normal";
-        if(remaining <= 300) timerDisplay.className = "timer-big timer-orange";
-        if(remaining <= 60) timerDisplay.className = "timer-big timer-red";
+        // Color Logic
+        display.className = "timer-big timer-normal";
+        if(timeLeft <= 300) display.className = "timer-big timer-orange";
+        if(timeLeft <= 60) display.className = "timer-big timer-red";
     }
 
-    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    function toggleTimer() {
+        if(isTimerRunning) {
+            pauseTimer();
+        } else {
+            startTimer();
+        }
+    }
 
+    function startTimer() {
+        if(isTimerRunning) return;
+        isTimerRunning = true;
+        document.getElementById('btnToggle').innerText = "Pause";
+        document.getElementById('btnToggle').className = "btn-grey"; // เปลี่ยนสีปุ่มให้รู้ว่ากดได้
+
+        modalTimerInterval = setInterval(() => {
+            if(timeLeft > 0) {
+                timeLeft--;
+                updateTimerDisplay();
+            } else {
+                pauseTimer();
+                alert("หมดเวลาสอบ!");
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        isTimerRunning = false;
+        clearInterval(modalTimerInterval);
+        document.getElementById('btnToggle').innerText = "Start";
+        document.getElementById('btnToggle').className = "btn-green";
+    }
+
+    function resetTimer() {
+        pauseTimer();
+        timeLeft = 900; // 15 นาที
+        updateTimerDisplay();
+    }
+
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+        pauseTimer(); // หยุดจับเวลาเมื่อปิดหน้าต่าง
+    }
+
+    // --- API Calls ---
     function actionToQueue() {
         const topic = document.getElementById('selTopic').value;
         sendAPI('toQueue', { id: currentStudent.id, topic: topic });
@@ -262,7 +340,9 @@
     }
     function actionStartExam() {
         sendAPI('startExam', { id: currentStudent.id });
-        closeModal();
+        // ไม่ต้อง closeModal ก็ได้ ให้มันเปลี่ยนหน้าจอไปเป็นจับเวลาเลย (รอ data refresh)
+        // แต่เพื่อความง่าย ปิดไปก่อน แล้วให้กรรมการกดเปิดมาใหม่เพื่อจับเวลา
+        closeModal(); 
     }
     function actionFinishExam() {
         if(!confirm("ยืนยันสอบผ่าน?")) return;
