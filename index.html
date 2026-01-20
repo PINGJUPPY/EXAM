@@ -12,7 +12,8 @@
             --primary-gold: #D4AF37;
             --primary-dark: #1a2639;
             --accent-red: #c0392b;
-            --accent-orange: #e67e22;
+            --accent-green: #27ae60;
+            --accent-orange: #f39c12;
             --bg-glass: rgba(255, 255, 255, 0.95);
         }
         body {
@@ -21,62 +22,72 @@
             background-image: url("https://www.transparenttextures.com/patterns/black-scales.png");
             color: #333; margin: 0; padding: 20px;
         }
-        header { text-align: center; color: var(--primary-gold); margin-bottom: 20px; text-shadow: 2px 2px 4px black; }
         
+        /* Header & Nav */
+        header { 
+            display: flex; justify-content: space-between; align-items: center;
+            color: var(--primary-gold); margin-bottom: 20px; border-bottom: 2px solid var(--primary-gold); padding-bottom: 10px;
+        }
+        .header-title h1 { margin: 0; font-family: 'Prompt'; font-size: 1.8rem; text-shadow: 2px 2px 4px black; }
+        .btn-history { background: transparent; border: 1px solid var(--primary-gold); color: var(--primary-gold); padding: 8px 15px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .btn-history:hover { background: var(--primary-gold); color: #000; }
+
         .container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; max-width: 1400px; margin: 0 auto; }
         .col { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 15px; border-radius: 10px; border: 1px solid #555; color: white; min-height: 500px; }
         .col-head { text-align: center; font-family: 'Prompt'; font-size: 1.2rem; color: var(--primary-gold); border-bottom: 2px solid var(--primary-gold); padding-bottom: 10px; margin-bottom: 15px; }
 
-        /* Card Design */
-        .card {
-            background: var(--bg-glass); color: #333; padding: 15px; margin-bottom: 10px; 
-            border-radius: 8px; cursor: pointer; position: relative;
-            transition: transform 0.2s; border-left: 5px solid #ccc;
-        }
+        /* Card */
+        .card { background: var(--bg-glass); color: #333; padding: 15px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; position: relative; border-left: 5px solid #ccc; transition: transform 0.2s; }
         .card:hover { transform: translateY(-3px); }
         .card-wait { border-left-color: #7f8c8d; }
         .card-queue { border-left-color: #f1c40f; background: #fffbe6; }
         .card-exam { border-left-color: #e74c3c; background: #fff0f0; }
-
         .card-name { font-weight: bold; font-size: 1.1rem; }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-top: 5px; color: white;}
         .bg-topic { background: var(--primary-dark); }
         .elapsed-time { font-family: 'Courier New'; font-weight: bold; color: var(--accent-red); float: right; font-size: 1.2rem; }
 
         /* Modal */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 999;
-        }
-        .modal-box {
-            background: #2c3e50; width: 90%; max-width: 450px; padding: 30px; border-radius: 15px;
-            text-align: center; color: white; border: 2px solid var(--primary-gold);
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 999; }
+        .modal-box { background: #2c3e50; width: 90%; max-width: 500px; padding: 30px; border-radius: 15px; text-align: center; color: white; border: 2px solid var(--primary-gold); max-height: 90vh; overflow-y: auto; }
         
-        select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; font-size: 1rem; border: none; cursor: pointer; }
+        select, button { width: 100%; padding: 12px; margin: 6px 0; border-radius: 8px; font-size: 1rem; border: none; cursor: pointer; }
         .btn-blue { background: #3498db; color: white; font-weight: bold; }
-        .btn-green { background: #2ecc71; color: white; font-weight: bold; }
-        .btn-red { background: #e74c3c; color: white; font-weight: bold; }
+        .btn-green { background: var(--accent-green); color: white; font-weight: bold; }
+        .btn-red { background: var(--accent-red); color: white; font-weight: bold; }
+        .btn-yellow { background: var(--accent-orange); color: white; font-weight: bold; }
         .btn-grey { background: #95a5a6; color: white; }
         .btn-close { background: #34495e; color: #ccc; margin-top: 15px; border: 1px solid #555; }
+        
+        /* Grid Buttons for Pass/Fail */
+        .btn-group-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
 
-        /* Timer Controls */
-        .control-group { display: flex; gap: 10px; margin-top: 10px; }
-        .timer-big { font-size: 4rem; font-family: 'Courier New', monospace; font-weight: bold; margin: 15px 0; }
+        /* Timer */
+        .timer-big { font-size: 4rem; font-family: 'Courier New', monospace; font-weight: bold; margin: 10px 0; }
         .timer-normal { color: white; }
         .timer-orange { color: var(--accent-orange); animation: blink 1s infinite; }
         .timer-red { color: var(--accent-red); animation: shake 0.5s infinite; }
-
         @keyframes blink { 50% { opacity: 0.5; } }
         @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, 1px); } }
-        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+
+        /* History Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; color: #ccc; font-size: 0.9rem; }
+        th, td { border-bottom: 1px solid #444; padding: 8px; text-align: left; }
+        th { color: var(--primary-gold); }
+        .res-pass { color: var(--accent-green); }
+        .res-fail { color: var(--accent-red); }
+
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } header { flex-direction: column; gap: 10px;} }
     </style>
 </head>
 <body>
 
 <header>
-    <h1><i class="fas fa-stopwatch"></i> ระบบคุมสอบนวดไทย</h1>
-    <div>โรงพยาบาลสะเดา</div>
+    <div class="header-title">
+        <h1><i class="fas fa-stopwatch"></i> ระบบคุมสอบนวดไทย</h1>
+        <div style="font-size:0.9rem;">โรงพยาบาลสะเดา</div>
+    </div>
+    <button onclick="openHistory()" class="btn-history"><i class="fas fa-history"></i> ดูบันทึกย้อนหลัง</button>
 </header>
 
 <div class="container">
@@ -112,35 +123,49 @@
         <div id="stage-timer" style="display:none;">
             <div id="timerDisplay" class="timer-big timer-normal">15:00</div>
             
-            <div class="control-group">
-                <button id="btnToggle" onclick="toggleTimer()" class="btn-green">Start</button>
-                <button onclick="resetTimer()" class="btn-grey">Reset</button>
+            <div class="btn-group-row">
+                <button id="btnToggle" onclick="toggleTimer()" class="btn-grey" style="width:100%">Start</button>
+                <button onclick="resetTimer()" class="btn-grey" style="width:100%">Reset</button>
             </div>
+
+            <hr style="border-color:#444; margin: 15px 0;">
             
-            <button onclick="actionFinishExam()" class="btn-red" style="margin-top:15px;"><i class="fas fa-check"></i> สอบเสร็จสิ้น</button>
+            <div style="text-align:left; font-size:0.9rem; color:#aaa;">บันทึกผลการสอบ:</div>
+            <div class="btn-group-row">
+                <button onclick="actionFinishExam('Pass')" class="btn-green"><i class="fas fa-check-circle"></i> สอบผ่าน</button>
+                <button onclick="actionFinishExam('Fail')" class="btn-red"><i class="fas fa-times-circle"></i> ไม่ผ่าน</button>
+            </div>
+
+            <button onclick="actionBackToQueue()" class="btn-yellow" style="margin-top:10px;">
+                <i class="fas fa-undo"></i> ยกเลิก/กลับไปรอหน้าห้อง
+            </button>
         </div>
 
-        <button onclick="closeModal()" class="btn-close">ปิดหน้าต่าง / ยกเลิก</button>
+        <button onclick="closeModal()" class="btn-close">ปิดหน้าต่าง</button>
+    </div>
+</div>
+
+<div id="historyModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:600px;">
+        <h2 style="color:var(--primary-gold); margin-top:0;"><i class="fas fa-list-alt"></i> บันทึกการสอบล่าสุด</h2>
+        <div id="historyList" style="text-align:left;">Loading...</div>
+        <button onclick="document.getElementById('historyModal').style.display='none'" class="btn-close">ปิด</button>
     </div>
 </div>
 
 <script>
     // **********************************
-    // ใส่ลิงก์ GAS ของคุณตรงนี้
-    const API_URL = "https://script.google.com/macros/s/AKfycby3XkXyTBYeA_jTeVb0KK6Ae3y2fqVxRkJEgRD_kkLG6T6xLKG6Dss5ZWbQGWbL5o7I/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycby3XkXyTBYeA_jTeVb0KK6Ae3y2fqVxRkJEgRD_kkLG6T6xLKG6Dss5ZWbQGWbL5o7I/exec"; // <--- ใส่ลิงก์ตรงนี้
     // **********************************
 
     const diseaseMap = { "1":"อัมพฤกษ์", "2":"หมอนรองกระดูก", "3":"สลักเพชร", "4":"ไหล่ติด", "5":"กล้ามเนื้อ/พังผืด", "6":"นิ้วล็อก", "7":"ปวดเข่า" };
     
     let allData = [];
     let currentStudent = null;
-    
-    // ตัวแปรสำหรับ Timer ใน Popup (Manual Control)
     let modalTimerInterval = null;
-    let timeLeft = 900; // 15 นาที
+    let timeLeft = 900; 
     let isTimerRunning = false;
 
-    // Main Loop (ดึงข้อมูลเรื่อยๆ)
     setInterval(fetchData, 2000); 
     setInterval(updateCardTimers, 1000); 
     fetchData();
@@ -195,7 +220,6 @@
         return 'card-wait';
     }
 
-    // อัพเดทเวลาหน้าบัตร (Dashboard) - ใช้นับเดินหน้าเหมือนเดิม
     function updateCardTimers() {
         allData.forEach(s => {
             if(s.status && s.status.toLowerCase() === 'examining' && s.startTime) {
@@ -225,7 +249,6 @@
         document.getElementById('stage-start').style.display = 'none';
         document.getElementById('stage-timer').style.display = 'none';
 
-        // เคลียร์ Timer เก่าทุกครั้งที่เปิดใหม่
         resetTimer(); 
 
         let status = currentStudent.status ? currentStudent.status.toLowerCase() : 'waiting';
@@ -257,51 +280,71 @@
         } else if (status === 'examining') {
             document.getElementById('stage-timer').style.display = 'block';
             
-            // คำนวณเวลาที่เหลือจาก Server (ถ้ามี) เพื่อให้เวลาตรงกัน
             if(currentStudent.startTime) {
-                const EXAM_DURATION = 15 * 60; // 15 นาทีเป็นวินาที
+                const EXAM_DURATION = 15 * 60; 
                 const elapsed = Math.floor((Date.now() - currentStudent.startTime) / 1000);
                 const remaining = EXAM_DURATION - elapsed;
-                
-                if(remaining > 0) {
-                    timeLeft = remaining;
-                } else {
-                    timeLeft = 0;
-                }
+                timeLeft = (remaining > 0) ? remaining : 0;
             }
-            
             updateTimerDisplay();
-            // เริ่มเดินเวลาอัตโนมัติเมื่อเปิดหน้าต่าง (หรือจะให้กด Start เองก็ได้ แต่แบบนี้สะดวกกว่า)
             startTimer(); 
         }
     }
 
-    // --- Manual Timer Functions ---
+    // --- History Logic ---
+    function openHistory() {
+        document.getElementById('historyModal').style.display = 'flex';
+        document.getElementById('historyList').innerHTML = '<div style="text-align:center;">กำลังโหลด...</div>';
+        
+        fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'getLogs' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.length === 0) {
+                document.getElementById('historyList').innerHTML = '<div style="text-align:center;">ยังไม่มีประวัติการสอบ</div>';
+                return;
+            }
+            let html = '<table><thead><tr><th>เวลา</th><th>ชื่อ</th><th>โรค</th><th>ผล</th></tr></thead><tbody>';
+            data.forEach(row => {
+                const date = new Date(row[0]);
+                const timeStr = date.toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
+                const topic = diseaseMap[row[2]] || row[2];
+                const resClass = row[3] === 'Pass' ? 'res-pass' : 'res-fail';
+                const resText = row[3] === 'Pass' ? 'ผ่าน' : 'ไม่ผ่าน';
+                
+                html += `<tr>
+                    <td>${timeStr}</td>
+                    <td>${row[1]}</td>
+                    <td>${topic}</td>
+                    <td class="${resClass}">${resText}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('historyList').innerHTML = html;
+        });
+    }
+
+    // --- Timer Functions ---
     function updateTimerDisplay() {
         const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
         const s = (timeLeft % 60).toString().padStart(2, '0');
         const display = document.getElementById('timerDisplay');
         display.innerText = `${m}:${s}`;
-
-        // Color Logic
+        
         display.className = "timer-big timer-normal";
         if(timeLeft <= 300) display.className = "timer-big timer-orange";
         if(timeLeft <= 60) display.className = "timer-big timer-red";
     }
 
-    function toggleTimer() {
-        if(isTimerRunning) {
-            pauseTimer();
-        } else {
-            startTimer();
-        }
-    }
+    function toggleTimer() { isTimerRunning ? pauseTimer() : startTimer(); }
 
     function startTimer() {
         if(isTimerRunning) return;
         isTimerRunning = true;
         document.getElementById('btnToggle').innerText = "Pause";
-        document.getElementById('btnToggle').className = "btn-grey"; // เปลี่ยนสีปุ่มให้รู้ว่ากดได้
+        document.getElementById('btnToggle').className = "btn-yellow"; 
 
         modalTimerInterval = setInterval(() => {
             if(timeLeft > 0) {
@@ -323,13 +366,13 @@
 
     function resetTimer() {
         pauseTimer();
-        timeLeft = 900; // 15 นาที
+        timeLeft = 900; 
         updateTimerDisplay();
     }
 
     function closeModal() {
         document.getElementById('modal').style.display = 'none';
-        pauseTimer(); // หยุดจับเวลาเมื่อปิดหน้าต่าง
+        pauseTimer(); 
     }
 
     // --- API Calls ---
@@ -340,15 +383,24 @@
     }
     function actionStartExam() {
         sendAPI('startExam', { id: currentStudent.id });
-        // ไม่ต้อง closeModal ก็ได้ ให้มันเปลี่ยนหน้าจอไปเป็นจับเวลาเลย (รอ data refresh)
-        // แต่เพื่อความง่าย ปิดไปก่อน แล้วให้กรรมการกดเปิดมาใหม่เพื่อจับเวลา
         closeModal(); 
     }
-    function actionFinishExam() {
-        if(!confirm("ยืนยันสอบผ่าน?")) return;
-        sendAPI('finishExam', { id: currentStudent.id, topic: currentStudent.topic });
+    
+    // ฟังก์ชันใหม่: รองรับ Pass/Fail
+    function actionFinishExam(result) {
+        let msg = result === 'Pass' ? "ยืนยันให้ 'สอบผ่าน' ใช่ไหม?" : "ยืนยันให้ 'สอบไม่ผ่าน' ใช่ไหม?";
+        if(!confirm(msg)) return;
+        sendAPI('finishExam', { id: currentStudent.id, topic: currentStudent.topic, result: result });
         closeModal();
     }
+    
+    // ฟังก์ชันใหม่: กลับไปรอหน้าห้อง
+    function actionBackToQueue() {
+        if(!confirm("ต้องการยกเลิกการสอบ และให้กลับไปรอหน้าห้องสอบ (คิว) ใช่ไหม?")) return;
+        sendAPI('backToQueue', { id: currentStudent.id });
+        closeModal();
+    }
+
     function sendAPI(action, payload) {
         fetch(API_URL, {
             method: 'POST',
